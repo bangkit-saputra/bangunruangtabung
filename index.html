@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bangun Ruang Sisi Lengkung - Tabung</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Nunito', 'Inter', sans-serif;
+            background-color: #f0fdfa;
+            color: #1e293b;
+            overflow: hidden; /* Prevent body scroll, handle inside slides */
+        }
+
+        /* Slide Transitions */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            transform: scale(0.95);
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-bottom: 80px; /* Space for nav bar */
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+            z-index: 10;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        /* Glassmorphism Navigation */
+        .nav-bar {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Interactive Elements styling */
+        .clickable-word {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .clickable-word:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .clickable-word.selected { border-color: #3b82f6; background-color: #bfdbfe; color: #1d4ed8; }
+        .drop-zone {
+            min-width: 100px;
+            min-height: 36px;
+            border: 2px dashed #94a3b8;
+            border-radius: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0 10px;
+            background: #f8fafc;
+            transition: all 0.2s;
+        }
+        .drop-zone.active { border-color: #3b82f6; background-color: #eff6ff; }
+        .drop-zone.filled { border-style: solid; border-color: #10b981; background-color: #d1fae5; color: #065f46; font-weight: bold;}
+
+        /* Modals */
+        #customModal {
+            transition: opacity 0.3s;
+        }
+
+        .animate-bounce-slow {
+            animation: bounce 3s infinite;
+        }
+    </style>
+</head>
+<body class="antialiased h-screen w-screen flex flex-col relative bg-gradient-to-br from-teal-50 to-blue-100">
+
+    <!-- Global Maximize Button -->
+    <button onclick="toggleFullScreen()" class="fixed top-4 right-4 z-50 bg-white/70 hover:bg-white p-3 rounded-full shadow-lg backdrop-blur text-slate-700 transition">
+        <i class="fas fa-expand" id="fullscreen-icon"></i>
+    </button>
+
+    <!-- App Container -->
+    <div id="app-container" class="relative w-full h-full">
+
+        <!-- ================= SLIDE 1: COVER ================= -->
+        <div id="slide-1" class="slide active flex flex-col items-center justify-center bg-gradient-to-b from-blue-500 to-teal-400 text-white">
+            <div class="text-center max-w-2xl px-6">
+                <!-- SVG Icon Tabung -->
+                <svg class="w-48 h-48 mx-auto mb-8 animate-bounce-slow drop-shadow-2xl" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Top Ellipse -->
+                    <ellipse cx="100" cy="50" rx="60" ry="20" fill="#60A5FA" stroke="white" stroke-width="4"/>
+                    <!-- Body -->
+                    <path d="M40 50 v100 a60 20 0 0 0 120 0 v-100" fill="#3B82F6" stroke="white" stroke-width="4"/>
+                    <!-- Dashed bottom inner -->
+                    <path d="M40 150 a60 20 0 0 1 120 0" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="4" stroke-dasharray="8 4"/>
+                </svg>
+                
+                <h1 class="text-4xl md:text-6xl font-extrabold mb-4 drop-shadow-lg tracking-tight">Bangun Ruang Tabung</h1>
+                <p class="text-lg md:text-2xl mb-2 font-medium">Matematika SMP Kelas 9</p>
+                <div class="bg-white/20 inline-block px-6 py-2 rounded-full backdrop-blur-sm mb-12 shadow-inner">
+                    <p class="text-sm md:text-base font-semibold"><i class="fas fa-user-edit mr-2"></i>Dibuat oleh: <span class="font-bold text-yellow-300">I Made Edy Bangkit Saputra</span></p>
+                </div>
+                <br>
+                <button onclick="goToSlide(2)" class="group relative px-8 py-4 bg-yellow-400 text-yellow-900 font-bold text-xl rounded-full shadow-[0_0_40px_rgba(250,204,21,0.5)] hover:bg-yellow-300 hover:scale-105 transition-all">
+                    Mulai Belajar <i class="fas fa-arrow-right ml-2 group-hover:translate-x-2 transition-transform"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= SLIDE 2: MENU ================= -->
+        <div id="slide-2" class="slide pt-20 px-4 md:px-12 bg-slate-50">
+            <h2 class="text-3xl font-bold text-center text-slate-800 mb-8"><i class="fas fa-bars text-blue-500 mr-2"></i>Menu Utama</h2>
+            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Menu Cards -->
+                <button onclick="goToSlide(3)" class="bg-white p-6 rounded-2xl shadow-md border-b-4 border-blue-500 hover:-translate-y-2 transition-transform text-left">
+                    <div class="bg-blue-100 w-14 h-14 rounded-full flex items-center justify-center text-blue-600 text-2xl mb-4"><i class="fas fa-bullseye"></i></div>
+                    <h3 class="text-xl font-bold text-slate-700">Tujuan & Peta</h3>
+                    <p class="text-sm text-slate-500 mt-2">Pahami arah belajar dan struktur materi tabung.</p>
+                </button>
+                <button onclick="goToSlide(5)" class="bg-white p-6 rounded-2xl shadow-md border-b-4 border-teal-500 hover:-translate-y-2 transition-transform text-left">
+                    <div class="bg-teal-100 w-14 h-14 rounded-full flex items-center justify-center text-teal-600 text-2xl mb-4"><i class="fas fa-book-open"></i></div>
+                    <h3 class="text-xl font-bold text-slate-700">Materi Inti</h3>
+                    <p class="text-sm text-slate-500 mt-2">Pelajari unsur, luas permukaan, dan volume.</p>
+                </button>
+                <button onclick="goToSlide(10)" class="bg-white p-6 rounded-2xl shadow-md border-b-4 border-red-500 hover:-translate-y-2 transition-transform text-left">
+                    <div class="bg-red-100 w-14 h-14 rounded-full flex items-center justify-center text-red-600 text-2xl mb-4"><i class="fab fa-youtube"></i></div>
+                    <h3 class="text-xl font-bold text-slate-700">Video Belajar</h3>
+                    <p class="text-sm text-slate-500 mt-2">Tonton penjelasan visual yang mudah dipahami.</p>
+                </button>
+                <button onclick="goToSlide(11)" class="bg-white p-6 rounded-2xl shadow-md border-b-4 border-purple-500 hover:-translate-y-2 transition-transform text-left">
+                    <div class="bg-purple-100 w-14 h-14 rounded-full flex items-center justify-center text-purple-600 text-2xl mb-4"><i class="fas fa-sliders-h"></i></div>
+                    <h3 class="text-xl font-bold text-slate-700">Simulasi Interaktif</h3>
+                    <p class="text-sm text-slate-500 mt-2">Coba ubah ukuran tabung dan lihat hasilnya.</p>
+                </button>
+                <button onclick="goToSlide(12)" class="bg-white p-6 rounded-2xl shadow-md border-b-4 border-orange-500 hover:-translate-y-2 transition-transform text-left">
+                    <div class="bg-orange-100 w-14 h-14 rounded-full flex items-center justify-center text-orange-600 text-2xl mb-4"><i class="fas fa-gamepad"></i></div>
+                    <h3 class="text-xl font-bold text-slate-700">Game Edukasi</h3>
+                    <p class="text-sm text-slate-500 mt-2">Bermain sambil belajar (Drag Drop, Tebak, dll).</p>
+                </button>
+                <button onclick="goToSlide(16)" class="bg-white p-6 rounded-2xl shadow-md border-b-4 border-indigo-500 hover:-translate-y-2 transition-transform text-left">
+                    <div class="bg-indigo-100 w-14 h-14 rounded-full flex items-center justify-center text-indigo-600 text-2xl mb-4"><i class="fas fa-tasks"></i></div>
+                    <h3 class="text-xl font-bold text-slate-700">Kuis Evaluasi</h3>
+                    <p class="text-sm text-slate-500 mt-2">Uji pemahamanmu dan raih skor terbaik!</p>
+                </button>
+                <button onclick="goToSlide(17)" class="bg-white p-6 rounded-2xl shadow-md border-b-4 border-green-500 hover:-translate-y-2 transition-transform text-left md:col-span-2 lg:col-span-3">
+                    <div class="bg-green-100 w-14 h-14 rounded-full flex items-center justify-center text-green-600 text-2xl mb-4"><i class="fas fa-clipboard-list"></i></div>
+                    <h3 class="text-xl font-bold text-slate-700">Rangkuman & Referensi</h3>
+                    <p class="text-sm text-slate-500 mt-2">Intisari pembelajaran.</p>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= SLIDE 3: TUJUAN PEMBELAJARAN ================= -->
+        <div id="slide-3" class="slide pt-20 px-4 md:px-12 bg-white">
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-blue-50 rounded-3xl p-8 border border-blue-100 shadow-sm relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 text-blue-200 opacity-50"><i class="fas fa-bullseye fa-10x"></i></div>
+                    <h2 class="text-3xl font-extrabold text-blue-800 mb-6 relative z-10">Tujuan Pembelajaran</h2>
+                    <p class="text-slate-600 mb-6 relative z-10">Sesuai dengan Kurikulum Merdeka, setelah mempelajari materi ini kalian diharapkan mampu:</p>
+                    <ul class="space-y-4 relative z-10">
+                        <li class="flex items-start">
+                            <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-blue-500 text-white rounded-full mr-4 shadow">1</span>
+                            <p class="text-lg text-slate-700 font-medium pt-1">Mengidentifikasi unsur-unsur dan jaring-jaring bangun ruang tabung.</p>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-blue-500 text-white rounded-full mr-4 shadow">2</span>
+                            <p class="text-lg text-slate-700 font-medium pt-1">Menemukan dan menghitung Luas Permukaan tabung.</p>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-blue-500 text-white rounded-full mr-4 shadow">3</span>
+                            <p class="text-lg text-slate-700 font-medium pt-1">Menemukan dan menghitung Volume tabung.</p>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-blue-500 text-white rounded-full mr-4 shadow">4</span>
+                            <p class="text-lg text-slate-700 font-medium pt-1">Menyelesaikan masalah kontekstual (sehari-hari) yang berkaitan dengan tabung.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SLIDE 4: PETA KONSEP ================= -->
+        <div id="slide-4" class="slide pt-20 px-4 md:px-12 bg-slate-50">
+            <h2 class="text-3xl font-extrabold text-center text-teal-700 mb-10">Peta Konsep</h2>
+            <div class="max-w-4xl mx-auto flex flex-col items-center">
+                <!-- Mindmap simple using divs -->
+                <div class="bg-teal-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg mb-6 z-10 text-xl">TABUNG</div>
+                <div class="w-1 bg-teal-300 h-8 -mt-6"></div>
+                <div class="w-64 md:w-3/4 border-t-4 border-teal-300 h-8 flex justify-between">
+                    <div class="w-1 bg-teal-300 h-8"></div>
+                    <div class="w-1 bg-teal-300 h-8"></div>
+                    <div class="w-1 bg-teal-300 h-8"></div>
+                </div>
+                <div class="w-full md:w-5/6 flex flex-col md:flex-row justify-between items-center md:items-start gap-4 -mt-2">
+                    <div class="bg-white border-2 border-teal-400 p-4 rounded-xl shadow-md w-48 text-center text-slate-700 font-semibold hover:bg-teal-50">
+                        <i class="fas fa-cube text-2xl text-teal-500 mb-2 block"></i>Unsur & Jaring-jaring
+                    </div>
+                    <div class="bg-white border-2 border-blue-400 p-4 rounded-xl shadow-md w-48 text-center text-slate-700 font-semibold hover:bg-blue-50">
+                        <i class="fas fa-layer-group text-2xl text-blue-500 mb-2 block"></i>Luas Permukaan<br><span class="text-xs text-slate-400 font-normal">L = 2πr(r+t)</span>
+                    </div>
+                    <div class="bg-white border-2 border-indigo-400 p-4 rounded-xl shadow-md w-48 text-center text-slate-700 font-semibold hover:bg-indigo-50">
+                        <i class="fas fa-fill-drip text-2xl text-indigo-500 mb-2 block"></i>Volume<br><span class="text-xs text-slate-400 font-normal">V = πr²t</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SLIDE 5: MATERI 1 (Unsur) ================= -->
+        <div id="slide-5" class="slide pt-16 px-4 md:px-12 bg-white">
+            <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-8 h-full pb-10">
+                <div class="flex-1">
+                    <span class="text-blue-500 font-bold uppercase tracking-wider text-sm">Materi 1</span>
+                    <h2 class="text-3xl font-extrabold text-slate-800 mb-4">Pengertian & Unsur Tabung</h2>
+                    <p class="text-slate-600 mb-4 text-lg">
+                        <strong>Tabung</strong> adalah bangun ruang sisi lengkung yang dibentuk oleh dua buah lingkaran identik (sama besar) yang sejajar dan sebuah persegi panjang yang mengelilingi kedua lingkaran tersebut.
+                    </p>
+                    <ul class="space-y-3 text-slate-700 mt-6 bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                        <li><i class="fas fa-check text-green-500 mr-2"></i><strong>Sisi Alas & Tutup:</strong> Dua lingkaran sejajar.</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i><strong>Selimut Tabung:</strong> Sisi lengkung penghubung alas & tutup.</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i><strong>Jari-jari (r):</strong> Jarak pusat lingkaran ke tepi.</li>
+                        <li><i class="fas fa-check text-green-500 mr-2"></i><strong>Tinggi (t):</strong> Jarak antara alas dan tutup.</li>
+                    </ul>
+                    <div class="mt-6 flex items-center bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+                        <i class="fas fa-lightbulb text-yellow-500 text-2xl mr-4"></i>
+                        <p class="text-sm text-slate-700"><strong>Contoh nyata:</strong> Kaleng susu, drum air, pipa pralon, baterai, celengan.</p>
+                    </div>
+                </div>
+                <div class="flex-1 flex justify-center">
+                    <svg width="250" height="300" viewBox="0 0 200 250" class="drop-shadow-lg">
+                        <defs>
+                            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#93c5fd;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Labels -->
+                        <text x="110" y="25" fill="#1e293b" font-size="12" font-weight="bold">Tutup (Lingkaran)</text>
+                        <path d="M100 35 L 70 50" stroke="#1e293b" stroke-width="1.5" />
+                        
+                        <!-- Top Ellipse -->
+                        <ellipse cx="100" cy="50" rx="60" ry="20" fill="#60A5FA" stroke="#1e293b" stroke-width="2"/>
+                        <!-- Center dot and radius -->
+                        <circle cx="100" cy="50" r="2" fill="#1e293b"/>
+                        <path d="M100 50 L 160 50" stroke="#1e293b" stroke-dasharray="3,3" stroke-width="2"/>
+                        <text x="125" y="45" fill="#1e293b" font-size="12" font-weight="bold">r</text>
+
+                        <!-- Body -->
+                        <path d="M40 50 v140 a60 20 0 0 0 120 0 v-140" fill="url(#grad1)" stroke="#1e293b" stroke-width="2" opacity="0.8"/>
+                        <!-- Dashed bottom inner -->
+                        <path d="M40 190 a60 20 0 0 1 120 0" fill="none" stroke="#1e293b" stroke-width="2" stroke-dasharray="4,4"/>
+                        
+                        <!-- Height label -->
+                        <path d="M170 50 L 170 190" stroke="#ef4444" stroke-width="2" stroke-dasharray="3,3"/>
+                        <path d="M165 50 L 175 50" stroke="#ef4444" stroke-width="2"/>
+                        <path d="M165 190 L 175 190" stroke="#ef4444" stroke-width="2"/>
+                        <text x="180" y="125" fill="#ef4444" font-size="14" font-weight="bold">t</text>
+                        
+                        <!-- Selimut label -->
+                        <text x="0" y="125" fill="#1e293b" font-size="12" font-weight="bold">Selimut</text>
+                        <path d="M45 125 L 70 125" stroke="#1e293b" stroke-width="1.5" />
+
+                        <!-- Alas label -->
+                        <text x="110" y="225" fill="#1e293b" font-size="12" font-weight="bold">Alas (Lingkaran)</text>
+                        <path d="M100 215 L 70 200" stroke="#1e293b" stroke-width="1.5" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SLIDE 6: MATERI 2 (Jaring) ================= -->
+        <div id="slide-6" class="slide pt-16 px-4 md:px-12 bg-slate-50">
+             <div class="max-w-5xl mx-auto flex flex-col md:flex-row-reverse items-center gap-8 h-full pb-10">
+                <div class="flex-1">
+                    <span class="text-teal-500 font-bold uppercase tracking-wider text-sm">Materi 2</span>
+                    <h2 class="text-3xl font-extrabold text-slate-800 mb-4">Jaring-jaring Tabung</h2>
+                    <p class="text-slate-600 mb-4 text-lg">
+                        Jika sebuah tabung kita belah dan dibentangkan, kita akan mendapatkan <strong>jaring-jaring tabung</strong> yang terdiri dari:
+                    </p>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <ul class="space-y-4 text-slate-700">
+                            <li class="flex items-start">
+                                <i class="far fa-circle text-teal-500 text-xl mr-3 mt-1"></i>
+                                <div>
+                                    <strong>Dua buah lingkaran</strong> (sebagai alas dan tutup) yang memiliki jari-jari sama (r).
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="far fa-square text-teal-500 text-xl mr-3 mt-1"></i>
+                                <div>
+                                    <strong>Satu buah persegi panjang</strong> (sebagai selimut tabung). <br>
+                                    <span class="text-sm bg-teal-100 px-2 py-1 rounded text-teal-800 mt-2 inline-block">Panjang = Keliling lingkaran alas (2πr)</span><br>
+                                    <span class="text-sm bg-teal-100 px-2 py-1 rounded text-teal-800 mt-1 inline-block">Lebar = Tinggi tabung (t)</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="flex-1 flex justify-center">
+                    <svg width="250" height="320" viewBox="0 0 250 320" class="drop-shadow-md">
+                        <!-- Top Circle -->
+                        <circle cx="125" cy="50" r="40" fill="#93c5fd" stroke="#2563eb" stroke-width="2"/>
+                        <circle cx="125" cy="50" r="2" fill="#1e293b"/>
+                        <path d="M125 50 L 165 50" stroke="#1e293b" stroke-dasharray="2,2"/>
+                        <text x="140" y="45" font-size="12">r</text>
+                        <text x="50" y="55" font-size="12" font-weight="bold">Tutup</text>
+
+                        <!-- Rectangle -->
+                        <rect x="25" y="100" width="200" height="120" fill="#86efac" stroke="#16a34a" stroke-width="2"/>
+                        <text x="85" y="165" font-size="14" font-weight="bold" fill="#065f46">Selimut Tabung</text>
+                        
+                        <!-- Annotations Rect -->
+                        <path d="M25 90 L 225 90" stroke="#374151" stroke-width="1"/>
+                        <text x="110" y="85" font-size="10">p = 2 × π × r</text>
+                        
+                        <path d="M235 100 L 235 220" stroke="#374151" stroke-width="1"/>
+                        <text x="240" y="165" font-size="10">l = t</text>
+
+                        <!-- Bottom Circle -->
+                        <circle cx="125" cy="270" r="40" fill="#93c5fd" stroke="#2563eb" stroke-width="2"/>
+                        <circle cx="125" cy="270" r="2" fill="#1e293b"/>
+                        <path d="M125 270 L 165 270" stroke="#1e293b" stroke-dasharray="2,2"/>
+                        <text x="140" y="265" font-size="12">r</text>
+                        <text x="55" y="275" font-size="12" font-weight="bold">Alas</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SLIDE 7: MATERI 3 (Luas Permukaan) ================= -->
+        <div id="slide-7" class="slide pt-16 px-4 md:px-12 bg-white">
+             <div class="max-w-4xl mx-auto text-center pb-10">
+                <span class="text-orange-500 font-bold uppercase tracking-wider text-sm">Materi 3</span>
+                <h2 class="text-3xl font-extrabold text-slate-800 mb-6">Luas Permukaan Tabung</h2>
+                <p class="text-slate-600 mb-8 text-lg">
+                    Luas permukaan adalah total luas dari seluruh jaring-jaring tabung.
+                </p>
+                
+                <div class="bg-orange-50 border-2 border-orange-200 rounded-3xl p-6 md:p-10 shadow-lg relative">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                            <h4 class="font-bold text-slate-700">Luas Alas</h4>
+                            <p class="text-2xl text-blue-600 font-mono mt-2">π × r²</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                            <h4 class="font-bold text-slate-700">Luas Tutup</h4>
+                            <p class="text-2xl text-blue-600 font-mono mt-2">π × r²</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                            <h4 class="font-bold text-slate-700">Luas Selimut</h4>
+                            <p class="text-2xl text-green-600 font-mono mt-2">2 × π × r × t</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8">
+                        <h4 class="text-lg text-slate-600 mb-2">Jadi, Rumus Luas Permukaan Tabung (L) secara penuh adalah:</h4>
+                        <div class="inline-block bg-orange-500 text-white text-2xl md:text-4xl font-mono font-bold px-8 py-4 rounded-2xl shadow-md transform rotate-1 hover:rotate-0 transition">
+                            L = 2πr (r + t)
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-6 text-sm text-slate-500">
+                    *Gunakan <strong>π = 22/7</strong> jika r kelipatan 7, atau <strong>π = 3,14</strong> jika bukan.
+                </p>
+            </div>
+        </div>
+
+        <!-- ================= SLIDE 8: MATERI 4 (Volume) ================= -->
+        <div id="slide-8" class="slide pt-16 px-4 md:px-12 bg-slate-50">
+            <div class="max-w-4xl mx-auto text-center pb-10">
+                <span class="text-indigo-500 font-bold uppercase tracking-wider text-sm">Materi 4</span>
+                <h2 class="text-3xl font-extrabold text-slate-800 mb-6">Volume Tabung</h2>
+                <p class="text-slate-600 mb-8 text-lg">
+                    Volume tabung mengukur seberapa banyak ruang (kapasitas) yang dapat diisi ke dalam tabung tersebut (misal: isi air dalam drum).
+                </p>
+                
+                <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+                    <div class="bg-indigo-600 text-white rounded-3xl p-8 shadow-xl relative overflow-hidden flex-1 w-full text-left">
+                        <div class="absolute -right-6 -top-6 opacity-20"><i class="fas fa-cubes fa-10x"></i></div>
+                        <p class="text-indigo-100 text-lg mb-2 relative z-10">Konsep Dasar:</p>
+                        <p class="text-xl font-semibold mb-6 relative z-10">Volume = Luas Alas × Tinggi</p>
+                        
+                        <p class="text-indigo-100 text-lg mb-2 relative z-10">Karena alas berbentuk lingkaran, maka:</p>
+                        <div class="bg-white text-indigo-800 text-3xl md:text-4xl font-mono font-bold px-6 py-4 rounded-xl shadow-inner inline-block relative z-10">
+                            V = π × r² × t
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-2xl shadow border border-slate-100 w-full md:w-64 text-center">
+                        <img src="https://placehold.co/200x200/e0e7ff/4f46e5?text=Isi+Air" class="rounded-xl mx-auto mb-4" onerror="this.style.display='none'">
+                        <!-- SVG Fallback for volume -->
+                        <svg width="150" height="150" viewBox="0 0 100 100" class="mx-auto block">
+                            <path d="M20 20 v60 a30 10 0 0 0 60 0 v-60" fill="none" stroke="#94a3b8" stroke-width="4"/>
+                            <path d="M20 50 v30 a30 10 0 0 0 60 0 v-30" fill="#6366f1" opacity="0.8"/>
+                            <ellipse cx="50" cy="50" rx="30" ry="10" fill="#818cf8"/>
+                            <ellipse cx="50" cy="20" rx="30" ry="10" fill="none" stroke="#94a3b8" stroke-width="4"/>
+                        </svg>
+                        <p class="text-sm font-bold text-slate-700 mt-4">Kapasitas Maksimal</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SLIDE 9: VIDEO ================= -->
+        <div id="slide-9" class="slide pt-16 px-4 md:px-12 bg-black text-white flex flex-col justify-center items-center">
+             <div class="w-full max-w-4xl text-center">
+                <h2 class="text-3xl font-bold mb-2 text-red-500"><i class="fab fa-youtube mr-3"></i>Video Pembelajaran</h2>
+                <p class="text-gray-400 mb-6">Tonton penjelasan detail mengenai materi bangun ruang tabung di bawah ini.</p>
+                <div class="relative w-full overflow-hidden rounded-2xl shadow-[0_0_30px_rgba(239,68,68,0.3)]" style="padding-top: 56.25%;">
+                    <iframe class="absolute top-0 left-0 w-full h-full border-0" 
+                            src="https://www.youtube.com/embed/QGndlXK1krk?si=y3rx-Z_LWOavvbcn" 
+                            title="YouTube video player" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            allowfullscreen>
+                    </iframe>
+                </div>
+             </div>
+        </div>
+
+        <!-- ================= SLIDE 10: SIMULASI ================= -->
+        <div id="slide-10" class="slide pt-16 px-4 md:px-12 bg-white">
+            <h2 class="text-3xl font-extrabold text-center text-purple-700 mb-2"><i class="fas fa-sliders-h mr-3"></i>Simulasi Kalkulator Tabung</h2>
+            <p class="text-center text-slate-500 mb-8">Geser slider untuk mengubah ukuran jari-jari dan tinggi, perhatikan perubahannya!</p>
+            
+            <div class="max-w-5xl mx-auto flex flex-col md:flex-row gap-8 pb-10">
+                <!-- Controls -->
+                <div class="flex-1 bg-purple-50 p-6 rounded-3xl border border-purple-200">
+                    <div class="mb-6">
+                        <label class="block text-slate-700 font-bold mb-2">Jari-jari (r) = <span id="sim-r-val" class="text-purple-700">7</span> cm</label>
+                        <input type="range" id="sim-r" min="1" max="21" value="7" class="w-full accent-purple-600 cursor-pointer h-2 bg-purple-200 rounded-lg appearance-none">
+                    </div>
+                    <div class="mb-8">
+                        <label class="block text-slate-700 font-bold mb-2">Tinggi (t) = <span id="sim-t-val" class="text-purple-700">10</span> cm</label>
+                        <input type="range" id="sim-t" min="1" max="30" value="10" class="w-full accent-purple-600 cursor-pointer h-2 bg-purple-200 rounded-lg appearance-none">
+                    </div>
+                    
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 mb-4">
+                        <p class="text-sm text-slate-500">Luas Permukaan:</p>
+                        <p class="text-2xl font-mono font-bold text-green-600"><span id="sim-l-val">748</span> cm²</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                        <p class="text-sm text-slate-500">Volume:</p>
+                        <p class="text-2xl font-mono font-bold text-blue-600"><span id="sim-v-val">1540</span> cm³</p>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-3">* Menggunakan π = 22/7 untuk kelipatan 7, selain itu π = 3.14</p>
+                </div>
+                
+                <!-- Visuals -->
+                <div class="flex-1 bg-slate-50 rounded-3xl border border-slate-200 flex items-end justify-center p-6 h-80 md:h-auto overflow-hidden relative">
+                    <!-- Dynamic SVG -->
+                    <div id="sim-visual-container" class="relative transition-all duration-300 ease-out" style="width: 100px; height: 150px;">
+                        <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 100">
+                            <!-- Top -->
+                            <ellipse cx="50" cy="15" rx="45" ry="10" fill="#d8b4fe" stroke="#9333ea" stroke-width="2"/>
+                            <!-- Body -->
+                            <path d="M5 15 v70 a45 10 0 0 0 90 0 v-70" fill="#e9d5ff" stroke="#9333ea" stroke-width="2" opacity="0.8"/>
+                            <path d="M5 85 a45 10 0 0 1 90 0" fill="none" stroke="#9333ea" stroke-width="2" stroke-dasharray="2,2"/>
+                        </svg>
+                        <div class="absolute top-0 w-full text-center -mt-6 text-purple-800 font-bold text-sm">r = <span id="sim-r-label">7</span></div>
+                        <div class="absolute top-1/2 -right-16 text-purple-800 font-bold text-sm">t = <span id="sim-t-label">10</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SLIDE 11: GAME 1 (Drag & Drop / Pasangkan) ================= -->
+        <div id="slide-11" class="slide pt-16 px-4 md:px-12 bg-white">
+            <h2 class="text-3xl font-extrabold text-center text-orange-600 mb-2"><i class="fas fa-puzzle-piece mr-3"></i>Game 1: Pasangkan Kata</h2>
+            <p class="text-center text-slate-600 mb-8">Pilih kata di kotak biru, lalu klik kotak kosong yang tepat di kalimat sebelahnya!</p>
+            
+            <div class="max-w-4xl mx-auto flex flex-col md:flex-row gap-8 pb-10">
+                <!-- Word Bank -->
+                <div class="w-full md:w-1/3 bg-blue-50 p-6 rounded-2xl border border-blue-200">
+                    <h3 class="font-bold text-blue-800 mb-4 text-center">Pilihan Kata</h3>
+                    <div id="g1-bank" class="flex flex-wrap gap-3 justify-center">
+                        <div class="clickable-word bg-white border-2 border-blue-300 text-blue-700 px-4 py-2 rounded-lg shadow-sm font-semibold" onclick="selectWord(this, 'g1')">Selimut</div>
+                        <div class="clickable-word bg-white border-2 border-blue-300 text-blue-700 px-4 py-2 rounded-lg shadow-sm font-semibold" onclick="selectWord(this, 'g1')">Tinggi</div>
+                        <div class="clickable-word bg-white border-2 border-blue-300 text-blue-700 px-4 py-2 rounded-lg shadow-sm font-semibold" onclick="selectWord(this, 'g1')">Lingkaran</div>
+                        <div class="clickable-word bg-white border-2 border-blue-300 text-blue-700 px-4 py-2 rounded-lg shadow-sm font-semibold" onclick="selectWord(this, 'g1')">Dua</div>
+                        <div class="clickable-word bg-white border-2 border-blue-300 text-blue-700 px-4 py-2 rounded-lg shadow-sm font-semibold" onclick="selectWord(this, 'g1')">Jari-jari</div>
+                    </div>
+                </div>
+                
+                <!-- Target Sentences -->
+                <div class="w-full md:w-2/3 bg-orange-50 p-6 rounded-2xl border border-orange-200 space-y-4">
+                    <div class="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm">
+                        <span class="font-bold text-orange-500">1.</span>
+                        <p class="text-slate-700 flex-1">Alas tabung berbentuk <span class="drop-zone mx-1" onclick="dropWord(this, 'g1', 'Lingkaran')"></span>.</p>
+                    </div>
+                    <div class="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm">
+                        <span class="font-bold text-orange-500">2.</span>
+                        <p class="text-slate-700 flex-1">Tabung memiliki <span class="drop-zone mx-1" onclick="dropWord(this, 'g1', 'Dua')"></span> sisi yang sejajar.</p>
+                    </div>
+                    <div class="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm">
+                        <span class="font-bold text-orange-500">3.</span>
+                        <p class="text-slate-700 flex-1">Sisi lengkung pada tabung disebut <span class="drop-zone mx-1" onclick="dropWord(this, 'g1', 'Selimut')"></span>.</p>
+                    </div>
+                    <div class="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm">
+                        <span class="font-bold text-orange-500">4.</span>
+                        <p class="text-slate-700 flex-1">Jarak dari pusat alas ke tepi disebut <span class="drop-zone mx-1" onclick="dropWord(this, 'g1', 'Jari-jari')"></span>.</p>
+                    </div>
+                    <div class="flex items-center gap-3 bg-white p-3 rounded-xl shadow-sm">
+                        <span class="font-bold text-orange-500">5.</span>
+                        <p class="text-slate-700 flex-1">Jarak dari alas ke tutup disebut <span class="drop-zone mx-1" onclick="dropWord(this, 'g1', 'Tinggi')"></span>.</p>
+                    </div>
+                    
+                    <div class="mt-6 text-center">
+                        <button onclick="checkGame1()" class="bg-orange-500 text-white font-bold px-6 py-2 rounded-full hover:bg-orange-600 shadow-md">Cek Jawaban</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SLIDE 12: GAME 2 (Drag the Words) ================= -->
+        <div id="slide-12" class="slide pt-16 px-4 md:px-12 bg-slate-50">
+            <h2 class="text-3xl font-extrabold text-center text-teal-600 mb-2"><i class="fas fa-hand-pointer mr-3"></i>Game 2: Lengkapi Paragraf</h2>
+            <p class="text-center text-slate-600 mb-8">Pilih kata dan isi kotak kosong pada paragraf (Volume) di bawah ini!</p>
+
+            <div class="max-w-3xl mx-auto pb-10">
+                 <div id="g2-bank" class="flex flex-wrap gap-3 justify-center mb-8 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <div class="clickable-word bg-teal-100 border border-teal-300 text-teal-800 px-4 py-2 rounded-lg font-semibold" onclick="selectWord(this, 'g2')">Tinggi</div>
+                    <div class="clickable-word bg-teal-100 border border-teal-300 text-teal-800 px-4 py-2 rounded-lg font-semibold" onclick="selectWord(this, 'g2')">Luas Alas</div>
+                    <div class="clickable-word bg-teal-100 border border-teal-300 text-teal-800 px-4 py-2 rounded-lg font-semibold" onclick="selectWord(this, 'g2')">Volume</div>
+                    <div class="clickable-word bg-teal-100 border border-teal-300 text-teal-800 px-4 py-2 rounded-lg font-semibold" onclick="selectWord(this, 'g2')">Kapasitas</div>
+                    <div class="clickable-word bg-teal-100 border border-teal-300 text-teal-800 px-4 py-2 rounded-lg font-semibold" onclick="selectWord(this, 'g2')">Kuadrat</div>
+                </div>
+
+                <div class="bg-white p-8 rounded-2xl shadow border border-slate-200 text-lg leading-loose text-slate-700">
+                    Untuk menghitung <span class="drop-zone mx-1" onclick="dropWord(this, 'g2', 'Volume')"></span> sebuah tabung yang merepresentasikan <span class="drop-zone mx-1" onclick="dropWord(this, 'g2', 'Kapasitas')"></span> dari tabung tersebut, kita harus mengalikan <span class="drop-zone mx-1" onclick="dropWord(this, 'g2', 'Luas Alas')"></span> dengan <span class="drop-zone mx-1" onclick="dropWord(this, 'g2', 'Tinggi')"></span> tabung. Karena alas tabung berupa lingkaran, maka kita menggunakan nilai jari-jari yang di-<span class="drop-zone mx-1" onclick="dropWord(this, 'g2', 'Kuadrat')"></span>-kan lalu dikali Pi.
+                </div>
+                
+                <div class="mt-8 text-center">
+                    <button onclick="checkGame2()" class="bg-teal-500 text-white font-bold px-8 py-3 rounded-full hover:bg-teal-600 shadow-md">Cek Paragraf</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SLIDE 13: GAME 3 (Fill the Words) ================= -->
+        <div id="slide-13" class="slide pt-16 px-4 md:px-12 bg-white">
+            <h2 class="text-3xl font-extrabold text-center text-blue-600 mb-2"><i class="fas fa-keyboard mr-3"></i>Game 3: Ketik Jawaban</h2>
+            <p class="text-center text-slate-600 mb-8">Ketikkan kata yang tepat pada kolom isian di bawah ini! (Gunakan huruf kecil semua)</p>
+
+            <div class="max-w-3xl mx-auto pb-10">
+                <div class="bg-blue-50 p-8 rounded-2xl shadow-sm border border-blue-200 text-lg leading-loose text-slate-700">
+                    Jaring-jaring tabung terdiri dari dua bagian utama. Bagian pertama adalah alas dan tutup yang berbentuk <input type="text" id="g3-1" class="border-b-2 border-blue-400 bg-transparent w-24 text-center text-blue-800 font-bold focus:outline-none" autocomplete="off">. Bagian kedua adalah sisi lengkungnya yang jika dibuka akan membentuk sebuah <input type="text" id="g3-2" class="border-b-2 border-blue-400 bg-transparent w-32 text-center text-blue-800 font-bold focus:outline-none" autocomplete="off">. Panjang dari selimut tabung sama dengan keliling <input type="text" id="g3-3" class="border-b-2 border-blue-400 bg-transparent w-24 text-center text-blue-800 font-bold focus:outline-none" autocomplete="off"> alasnya. Sedangkan lebar dari selimut tabung sama dengan <input type="text" id="g3-4" class="border-b-2 border-blue-400 bg-transparent w-20 text-center text-blue-800 font-bold focus:outline-none" autocomplete="off"> tabung. Luas seluruh permukaannya disebut luas <input type="text" id="g3-5" class="border-b-2 border-blue-400 bg-transparent w-28 text-center text-blue-800 font-bold focus:outline-none" autocomplete="off"> tabung.
+                </div>
+                
+                <div class="mt-8 text-center">
+                    <button onclick="checkGame3()" class="bg-blue-500 text-white font-bold px-8 py-3 rounded-full hover:bg-blue-600 shadow-md">Koreksi Jawaban</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SLIDE 14: GAME 4 (Tebak Gambar) ================= -->
+        <div id="slide-14" class="slide pt-16 px-4 md:px-12 bg-slate-900 text-white">
+            <h2 class="text-3xl font-extrabold text-center text-yellow-400 mb-2"><i class="fas fa-search mr-3"></i>Game 4: Tebak Benda</h2>
+            <p class="text-center text-slate-300 mb-8">Apakah benda di bawah ini berbentuk tabung? Pilih Ya atau Tidak!</p>
+
+            <div class="max-w-5xl mx-auto pb-10 relative">
+                <!-- Carousel Container -->
+                <div class="flex gap-4 overflow-x-auto snap-x snap-mandatory py-4 hide-scrollbar">
+                    
+                    <!-- Item 1 -->
+                    <div class="snap-center shrink-0 w-64 bg-slate-800 rounded-2xl p-4 flex flex-col items-center border border-slate-700">
+                        <div class="h-40 flex items-center justify-center mb-4 text-6xl text-slate-300">
+                            <i class="fas fa-battery-full"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-4">Baterai</h4>
+                        <div class="flex gap-2 w-full" id="g4-q1">
+                            <button onclick="answerG4(this, true)" class="flex-1 bg-slate-700 hover:bg-green-600 py-2 rounded font-bold transition">YA</button>
+                            <button onclick="answerG4(this, false)" class="flex-1 bg-slate-700 hover:bg-red-600 py-2 rounded font-bold transition">TIDAK</button>
+                        </div>
+                    </div>
+
+                    <!-- Item 2 -->
+                    <div class="snap-center shrink-0 w-64 bg-slate-800 rounded-2xl p-4 flex flex-col items-center border border-slate-700">
+                        <div class="h-40 flex items-center justify-center mb-4 text-6xl text-slate-300">
+                            <i class="fas fa-dice"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-4">Dadu</h4>
+                        <div class="flex gap-2 w-full" id="g4-q2">
+                            <button onclick="answerG4(this, false)" class="flex-1 bg-slate-700 hover:bg-green-600 py-2 rounded font-bold transition">YA</button>
+                            <button onclick="answerG4(this, true)" class="flex-1 bg-slate-700 hover:bg-red-600 py-2 rounded font-bold transition">TIDAK</button>
+                        </div>
+                    </div>
+
+                    <!-- Item 3 -->
+                    <div class="snap-center shrink-0 w-64 bg-slate-800 rounded-2xl p-4 flex flex-col items-center border border-slate-700">
+                        <div class="h-40 flex items-center justify-center mb-4 text-6xl text-slate-300">
+                            <i class="fas fa-trash-alt"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-4">Tong Sampah (Lurus)</h4>
+                        <div class="flex gap-2 w-full" id="g4-q3">
+                            <button onclick="answerG4(this, true)" class="flex-1 bg-slate-700 hover:bg-green-600 py-2 rounded font-bold transition">YA</button>
+                            <button onclick="answerG4(this, false)" class="flex-1 bg-slate-700 hover:bg-red-600 py-2 rounded font-bold transition">TIDAK</button>
+                        </div>
+                    </div>
+
+                    <!-- Item 4 -->
+                    <div class="snap-center shrink-0 w-64 bg-slate-800 rounded-2xl p-4 flex flex-col items-center border border-slate-700">
+                        <div class="h-40 flex items-center justify-center mb-4 text-6xl text-slate-300">
+                            <i class="fas fa-futbol"></i>
+                        </div>
+                        <h4 class="font-bold text-lg mb-4">Bola</h4>
+                        <div class="flex gap-2 w-full" id="g4-q4">
+                            <button onclick="answerG4(this, false)" class="flex-1 bg-slate-700 hover:bg-green-600 py-2 rounded font-bold transition">YA</button>
+                            <button onclick="answerG4(this, true)" class="flex-1 bg-slate-700 hover:bg-red-600 py-2 rounded font-bold transition">TIDAK</button>
+                        </div>
+                    </div>
+
+                    <!-- Item 5 -->
+                    <div class="snap-center shrink-0 w-64 bg-slate-800 rounded-2xl p-4 flex flex-col items-center border border-slate-700">
+                        <div class="h-40 flex items-center justify-center mb-4">
+                            <svg width="60" height="80" viewBox="0 0 60 80">
+                                <ellipse cx="30" cy="10" rx="25" ry="8" fill="#cbd5e1"/>
+                                <path d="M5 10 v60 a25 8 0 0 0 50 0 v-60" fill="#94a3b8"/>
+                                <ellipse cx="30" cy="70" rx="25" ry="8" fill="#64748b"/>
+                            </svg>
+                        </div>
+                        <h4 class="font-bold text-lg mb-4">Kaleng Susu</h4>
+                        <div class="flex gap-2 w-full" id="g4-q5">
+                            <button onclick="answerG4(this, true)" class="flex-1 bg-slate-700 hover:bg-green-600 py-2 rounded font-bold transition">YA</button>
+                            <button onclick="answerG4(this, false)" class="flex-1 bg-slate-700 hover:bg-red-600 py-2 rounded font-bold transition">TIDAK</button>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-center text-slate-400 mt-4 text-sm">*Geser untuk melihat semua benda</p>
+            </div>
+        </div>
+
+        <!-- ================= SLIDE 15: KUIS INTERAKTIF ================= -->
+        <div id="slide-15" class="slide pt-16 px-4 md:px-12 bg-indigo-50">
+            <h2 class="text-3xl font-extrabold text-center text-indigo-800 mb-6"><i class="fas fa-medal mr-3"></i>Kuis Evaluasi</h2>
+            
+            <!-- Quiz Container (Scrollable) -->
+            <div class="max-w-4xl mx-auto bg-white rounded-3xl shadow-lg border border-indigo-100 p-6 md:p-10 mb-10" id="quiz-container">
+                <p class="text-center font-bold text-slate-600 mb-6 border-b pb-4">Jawab 10 Pertanyaan di bawah ini (Pilihan Ganda, Benar/Salah, Drag Drop)</p>
+                
+                <div id="quiz-questions" class="space-y-10">
+                    <!-- Q1 - PG -->
+                    <div class="quiz-q" data-type="mc" data-answer="b">
+                        <p class="font-bold text-lg text-slate-800 mb-3">1. Rumus luas selimut tabung adalah...</p>
+                        <div class="space-y-2">
+                            <label class="block p-3 rounded-xl border hover:bg-indigo-50 cursor-pointer"><input type="radio" name="q1" value="a"> A. πr²t</label>
+                            <label class="block p-3 rounded-xl border hover:bg-indigo-50 cursor-pointer"><input type="radio" name="q1" value="b"> B. 2πrt</label>
+                            <label class="block p-3 rounded-xl border hover:bg-indigo-50 cursor-pointer"><input type="radio" name="q1" value="c"> C. 2πr(r+t)</label>
+                        </div>
+                    </div>
+                    <!-- Q2 - PG -->
+                    <div class="quiz-q" data-type="mc" data-answer="c">
+                        <p class="font-bold text-lg text-slate-800 mb-3">2. Jika tabung jari-jarinya 7 cm dan tinggi 10 cm, maka Volumenya adalah? (π=22/7)</p>
+                        <div class="space-y-2">
+                            <label class="block p-3 rounded-xl border hover:bg-indigo-50 cursor-pointer"><input type="radio" name="q2" value="a"> A. 1.540 cm²</label>
+                            <label class="block p-3 rounded-xl border hover:bg-indigo-50 cursor-pointer"><input type="radio" name="q2" value="b"> B. 748 cm³</label>
+                            <label class="block p-3 rounded-xl border hover:bg-indigo-50 cursor-pointer"><input type="radio" name="q2" value="c"> C. 1.540 cm³</label>
+                        </div>
+                    </div>
+                    <!-- Q3 - PG -->
+                    <div class="quiz-q" data-type="mc" data-answer="a">
+                        <p class="font-bold text-lg text-slate-800 mb-3">3. Banyaknya sisi pada bangun ruang tabung adalah...</p>
+                        <div class="space-y-2">
+                            <label class="block p-3 rounded-xl border hover:bg-indigo-50 cursor-pointer"><input type="radio" name="q3" value="a"> A. 3</label>
+                            <label class="block p-3 rounded-xl border hover:bg-indigo-50 cursor-pointer"><input type="radio" name="q3" value="b"> B. 2</label>
+                            <label class="block p-3 rounded-xl border hover:bg-indigo-50 cursor-pointer"><input type="radio" name="q3" value="c"> C. 4</label>
+                        </div>
+                    </div>
+                    <!-- Q4 - PG -->
+                    <div class="quiz-q" data-type="mc" data-answer="c">
+                        <p class="font-bold text-lg text-slate-800 mb-3">4. Bentuk jaring-jaring selimut tabung adalah...</p>
+                        <div class="space-y-2">
+                            <label class="block p-3 rounded-xl border hover:bg-indigo-50 cursor-pointer"><input type="radio" name="q4" value="a"> A. Segitiga</label>
+                            <label class="block p-3 rounded-xl border hover:bg-indigo-50 cursor-pointer"><input type="radio" name="q4" value="b"> B. Lingkaran</label>
+                            <label class="block p-3 rounded-xl border hover:bg-indigo-50 cursor-pointer"><input type="radio" name="q4" value="c"> C. Persegi panjang</label>
+                        </div>
+                    </div>
+                    <!-- Q5 - PG -->
+                    <div class="quiz-q" data-type="mc" data-answer="b">
+                        <p class="font-bold text-lg text-slate-800 mb-3">5. Rumus luas permukaan tabung tanpa tutup adalah...</p>
+                        <div class="space-y-2">
+                            <label class="block p-3 rounded-xl border hover:bg-indigo-50 cursor-pointer"><input type="radio" name="q5" value="a"> A. 2πr(r+t)</label>
+                            <label class="block p-3 rounded-xl border hover:bg-indigo-50 cursor-pointer"><input type="radio" name="q5" value="b"> B. πr² + 2πrt</label>
+                            <label class="block p-3 rounded-xl border hover:bg-indigo-50 cursor-pointer"><input type="radio" name="q5" value="c"> C. πr²t</label>
+                        </div>
+                    </div>
+
+                    <!-- Q6-7 TF -->
+                    <div class="quiz-q" data-type="mc" data-answer="a">
+                        <p class="font-bold text-lg text-slate-800 mb-3">6. (Benar/Salah) Drum minyak adalah contoh benda berbentuk tabung.</p>
+                        <div class="flex gap-4">
+                            <label class="flex-1 p-3 rounded-xl border hover:bg-green-50 text-center cursor-pointer font-bold text-green-700"><input type="radio" name="q6" value="a" class="hidden"> Benar</label>
+                            <label class="flex-1 p-3 rounded-xl border hover:bg-red-50 text-center cursor-pointer font-bold text-red-700"><input type="radio" name="q6" value="b" class="hidden"> Salah</label>
+                        </div>
+                    </div>
+                    <div class="quiz-q" data-type="mc" data-answer="b">
+                        <p class="font-bold text-lg text-slate-800 mb-3">7. (Benar/Salah) Tabung memiliki titik sudut.</p>
+                        <div class="flex gap-4">
+                            <label class="flex-1 p-3 rounded-xl border hover:bg-green-50 text-center cursor-pointer font-bold text-green-700"><input type="radio" name="q7" value="a" class="hidden"> Benar</label>
+                            <label class="flex-1 p-3 rounded-xl border hover:bg-red-50 text-center cursor-pointer font-bold text-red-700"><input type="radio" name="q7" value="b" class="hidden"> Salah</label>
+                        </div>
+                    </div>
+
+                    <!-- Q8-10 Match (simplified as inputs/selects for ease in single form) -->
+                    <div class="quiz-q" data-type="select">
+                        <p class="font-bold text-lg text-slate-800 mb-3">Pilih pasangan rumus yang benar:</p>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center bg-slate-50 p-2 rounded">
+                                <span>8. Luas Alas Tabung = </span>
+                                <select id="q8" class="border p-2 rounded w-48" data-answer="pi*r*r">
+                                    <option value="">--Pilih--</option>
+                                    <option value="pi*r*r">π × r²</option>
+                                    <option value="2*pi*r*t">2 × π × r × t</option>
+                                    <option value="pi*r*r*t">π × r² × t</option>
+                                </select>
+                            </div>
+                            <div class="flex justify-between items-center bg-slate-50 p-2 rounded">
+                                <span>9. Volume Tabung = </span>
+                                <select id="q9" class="border p-2 rounded w-48" data-answer="pi*r*r*t">
+                                    <option value="">--Pilih--</option>
+                                    <option value="pi*r*r">π × r²</option>
+                                    <option value="2*pi*r*t">2 × π × r × t</option>
+                                    <option value="pi*r*r*t">π × r² × t</option>
+                                </select>
+                            </div>
+                            <div class="flex justify-between items-center bg-slate-50 p-2 rounded">
+                                <span>10. Luas Selimut Tabung = </span>
+                                <select id="q10" class="border p-2 rounded w-48" data-answer="2*pi*r*t">
+                                    <option value="">--Pilih--</option>
+                                    <option value="pi*r*r">π × r²</option>
+                                    <option value="2*pi*r*t">2 × π × r × t</option>
+                                    <option value="pi*r*r*t">π × r² × t</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-10 text-center border-t pt-8">
+                    <button onclick="submitQuiz()" class="bg-indigo-600 text-white font-bold text-xl px-10 py-4 rounded-full hover:bg-indigo-700 shadow-xl transition transform hover:-translate-y-1">Kumpulkan Kuis</button>
+                </div>
+            </div>
+
+            <!-- Quiz Result Modal Content (Hidden by default) -->
+            <div id="quiz-result" class="hidden max-w-2xl mx-auto bg-white rounded-3xl shadow-2xl p-10 text-center mb-10">
+                <i class="fas fa-trophy text-6xl text-yellow-400 mb-4"></i>
+                <h3 class="text-3xl font-bold text-slate-800 mb-2">Skor Kamu: <span id="quiz-score" class="text-indigo-600">0</span> / 100</h3>
+                <p id="quiz-msg" class="text-lg text-slate-600 mb-6"></p>
+                <button onclick="document.getElementById('quiz-result').classList.add('hidden'); document.getElementById('quiz-container').classList.remove('hidden');" class="text-indigo-500 font-bold underline">Ulangi Kuis</button>
+            </div>
+        </div>
+
+        <!-- ================= SLIDE 16: RANGKUMAN ================= -->
+        <div id="slide-16" class="slide pt-16 px-4 md:px-12 bg-white">
+            <h2 class="text-3xl font-extrabold text-center text-teal-600 mb-8"><i class="fas fa-layer-group mr-3"></i>Rangkuman Materi</h2>
+            
+            <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-10">
+                <!-- Card 1 -->
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl shadow border border-blue-200">
+                    <h3 class="font-bold text-xl text-blue-800 mb-3 border-b border-blue-200 pb-2">Definisi</h3>
+                    <p class="text-slate-700">Tabung adalah bangun ruang sisi lengkung dengan alas dan tutup berupa lingkaran sejajar serta selimut berbentuk persegi panjang.</p>
+                </div>
+                <!-- Card 2 -->
+                <div class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl shadow border border-green-200">
+                    <h3 class="font-bold text-xl text-green-800 mb-3 border-b border-green-200 pb-2">Unsur</h3>
+                    <ul class="list-disc pl-5 text-slate-700">
+                        <li>3 Sisi (2 lingkaran, 1 melengkung)</li>
+                        <li>2 Rusuk lengkung</li>
+                        <li>0 Titik sudut</li>
+                    </ul>
+                </div>
+                <!-- Card 3 -->
+                <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-2xl shadow border border-orange-200">
+                    <h3 class="font-bold text-xl text-orange-800 mb-3 border-b border-orange-200 pb-2">Rumus L. Permukaan</h3>
+                    <p class="text-slate-700 mb-1">L = 2 × Luas Alas + L. Selimut</p>
+                    <p class="font-mono font-bold text-lg text-orange-900 bg-white/50 inline-block px-2 py-1 rounded">L = 2πr(r + t)</p>
+                </div>
+                <!-- Card 4 -->
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-2xl shadow border border-purple-200">
+                    <h3 class="font-bold text-xl text-purple-800 mb-3 border-b border-purple-200 pb-2">Rumus Volume</h3>
+                    <p class="text-slate-700 mb-1">V = Luas Alas × Tinggi</p>
+                    <p class="font-mono font-bold text-lg text-purple-900 bg-white/50 inline-block px-2 py-1 rounded">V = πr²t</p>
+                </div>
+                <!-- Card 5 -->
+                <div class="bg-gradient-to-br from-rose-50 to-rose-100 p-6 rounded-2xl shadow border border-rose-200 md:col-span-2 lg:col-span-1">
+                    <h3 class="font-bold text-xl text-rose-800 mb-3 border-b border-rose-200 pb-2">Luas Selimut</h3>
+                    <p class="text-slate-700 mb-1">Selimut berupa persegi panjang</p>
+                    <p class="font-mono font-bold text-lg text-rose-900 bg-white/50 inline-block px-2 py-1 rounded">L.s = 2πrt</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SLIDE 17: PENUTUP ================= -->
+        <div id="slide-17" class="slide flex flex-col justify-center items-center px-4 md:px-12 bg-slate-900 text-white">
+            <div class="text-center max-w-2xl">
+                <i class="fas fa-check-circle text-6xl text-green-400 mb-6"></i>
+                <h2 class="text-4xl font-extrabold mb-4">Pembelajaran Selesai!</h2>
+                <p class="text-lg text-slate-300 mb-8">Selamat, kamu telah menyelesaikan materi Bangun Ruang Tabung dengan sangat baik. Teruslah berlatih soal agar semakin mahir!</p>
+                
+                <div class="bg-slate-800 p-6 rounded-2xl mb-8 border border-slate-700">
+                    <h3 class="font-bold text-yellow-400 mb-2">Referensi Belajar Lanjutan:</h3>
+                    <ul class="text-slate-400 text-sm space-y-1">
+                        <li>- Buku Paket Matematika SMP Kelas 9 (Kemdikbud)</li>
+                        <li>- Channel Youtube Edukasi Matematika</li>
+                        <li>- Portal Rumah Belajar Kemdikbud</li>
+                    </ul>
+                </div>
+                
+                <button onclick="goToSlide(1)" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-full font-bold shadow-lg transition">
+                    <i class="fas fa-redo mr-2"></i> Kembali ke Awal
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= NAVIGATION BAR ================= -->
+        <div id="nav-bar" class="nav-bar fixed bottom-0 left-0 w-full h-16 flex items-center justify-between px-4 md:px-8 z-50 transition-transform duration-300 transform translate-y-full">
+            <button onclick="prevSlide()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 w-10 h-10 rounded-full flex items-center justify-center transition">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            <div class="flex items-center gap-4">
+                <button onclick="goToSlide(2)" title="Menu Utama" class="bg-blue-100 hover:bg-blue-200 text-blue-700 w-10 h-10 rounded-full flex items-center justify-center transition">
+                    <i class="fas fa-home"></i>
+                </button>
+                <span id="page-indicator" class="text-sm font-bold text-slate-600 bg-white px-4 py-1 rounded-full shadow-sm border border-slate-200">
+                    Hal 1 / 17
+                </span>
+            </div>
+
+            <button onclick="nextSlide()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 w-10 h-10 rounded-full flex items-center justify-center transition">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Custom Alert Modal -->
+    <div id="customModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4 transform scale-95 transition-transform" id="modalContent">
+            <div id="modalIcon" class="text-5xl mb-4 text-center"></div>
+            <h3 id="modalTitle" class="text-2xl font-bold text-center text-slate-800 mb-2"></h3>
+            <p id="modalMessage" class="text-slate-600 text-center mb-6"></p>
+            <div class="text-center">
+                <button onclick="closeModal()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-6 py-2 rounded-full w-full">OK Mengerti</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Navigation Logic ---
+        const totalSlides = 17;
+        let currentSlide = 1;
+
+        function updateNav() {
+            // Hide nav on cover
+            const navBar = document.getElementById('nav-bar');
+            if (currentSlide === 1) {
+                navBar.classList.add('translate-y-full');
+            } else {
+                navBar.classList.remove('translate-y-full');
+            }
+            
+            // Update indicator
+            document.getElementById('page-indicator').innerText = `Hal ${currentSlide} / ${totalSlides}`;
+            
+            // Manage active class
+            document.querySelectorAll('.slide').forEach(el => el.classList.remove('active'));
+            document.getElementById(`slide-${currentSlide}`).classList.add('active');
+
+            // Pause iframe video if navigating away
+            const iframe = document.querySelector('iframe');
+            if(iframe && currentSlide !== 9) {
+                const src = iframe.src;
+                iframe.src = src; // Reloads iframe, stops video
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateNav();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateNav();
+            }
+        }
+
+        function goToSlide(n) {
+            if (n >= 1 && n <= totalSlides) {
+                currentSlide = n;
+                updateNav();
+            }
+        }
+
+        // --- Fullscreen Logic ---
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    showModal("Error", `Tidak dapat memaksimalkan layar: ${err.message}`, "error");
+                });
+                document.getElementById('fullscreen-icon').classList.replace('fa-expand', 'fa-compress');
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                    document.getElementById('fullscreen-icon').classList.replace('fa-compress', 'fa-expand');
+                }
+            }
+        }
+
+        // --- Custom Modal ---
+        function showModal(title, message, type = "info") {
+            const modal = document.getElementById('customModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerText = message;
+            
+            const icon = document.getElementById('modalIcon');
+            if(type === 'success') icon.innerHTML = '<i class="fas fa-check-circle text-green-500"></i>';
+            else if(type === 'error') icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+            else icon.innerHTML = '<i class="fas fa-info-circle text-blue-500"></i>';
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-95');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('customModal');
+            const modalContent = document.getElementById('modalContent');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modalContent.classList.add('scale-95');
+        }
+
+        // --- Simulator Logic ---
+        const rInput = document.getElementById('sim-r');
+        const tInput = document.getElementById('sim-t');
+        
+        function updateSimulator() {
+            const r = parseInt(rInput.value);
+            const t = parseInt(tInput.value);
+            
+            document.getElementById('sim-r-val').innerText = r;
+            document.getElementById('sim-t-val').innerText = t;
+            document.getElementById('sim-r-label').innerText = r;
+            document.getElementById('sim-t-label').innerText = t;
+            
+            const isKelipatan7 = r % 7 === 0;
+            const pi = isKelipatan7 ? (22/7) : 3.14;
+            
+            const l = 2 * pi * r * (r + t);
+            const v = pi * r * r * t;
+            
+            // Format to 2 decimal places if not integer
+            document.getElementById('sim-l-val').innerText = Number.isInteger(l) ? l : l.toFixed(2);
+            document.getElementById('sim-v-val').innerText = Number.isInteger(v) ? v : v.toFixed(2);
+
+            // Update SVG Visual scale
+            const svgContainer = document.getElementById('sim-visual-container');
+            // Base width: 40px + r*5, Base height: 30px + t*5
+            const newW = 30 + (r * 6);
+            const newH = 50 + (t * 6);
+            svgContainer.style.width = `${newW}px`;
+            svgContainer.style.height = `${newH}px`;
+        }
+        
+        rInput.addEventListener('input', updateSimulator);
+        tInput.addEventListener('input', updateSimulator);
+        updateSimulator(); // Init
+
+        // --- Games Shared State (Click to Place approach) ---
+        let activeWords = { 'g1': null, 'g2': null };
+
+        function selectWord(el, gameId) {
+            // Deselect previous
+            if(activeWords[gameId]) {
+                activeWords[gameId].classList.remove('selected');
+            }
+            // Select new
+            el.classList.add('selected');
+            activeWords[gameId] = el;
+        }
+
+        function dropWord(zone, gameId, expectedAnswer) {
+            if(!activeWords[gameId]) return;
+            
+            // Place text
+            const word = activeWords[gameId].innerText;
+            zone.innerText = word;
+            zone.classList.add('active');
+            zone.dataset.answer = word;
+            
+            // Hide from bank (visually)
+            activeWords[gameId].style.display = 'none';
+            activeWords[gameId].classList.remove('selected');
+            
+            // Restore previous word to bank if overwritten
+            if(zone.dataset.prevSource) {
+                const prevId = zone.dataset.prevSource;
+                const allWords = document.querySelectorAll(`#${gameId}-bank .clickable-word`);
+                allWords.forEach(w => {
+                    if(w.innerText === zone.dataset.prevWord) w.style.display = 'inline-block';
+                });
+            }
+            
+            zone.dataset.prevWord = word;
+            activeWords[gameId] = null;
+        }
+
+        // Game 1 Check
+        function checkGame1() {
+            const zones = document.querySelectorAll('#slide-11 .drop-zone');
+            let correct = 0;
+            let allFilled = true;
+            
+            zones.forEach(z => {
+                if(!z.innerText) allFilled = false;
+                if(z.innerText === z.getAttribute('onclick').split("'")[3]) {
+                    correct++;
+                    z.classList.add('filled');
+                } else {
+                    z.classList.remove('filled');
+                    z.style.borderColor = 'red';
+                }
+            });
+
+            if(!allFilled) {
+                showModal("Perhatian", "Harap isi semua kotak yang kosong terlebih dahulu!", "info");
+                return;
+            }
+            if(correct === 5) {
+                showModal("Luar Biasa!", "Semua jawaban Game 1 benar!", "success");
+            } else {
+                showModal("Coba Lagi", `Kamu menjawab benar ${correct} dari 5. Perbaiki yang masih salah!`, "error");
+            }
+        }
+
+        // Game 2 Check
+        function checkGame2() {
+            const zones = document.querySelectorAll('#slide-12 .drop-zone');
+            let correct = 0;
+            let allFilled = true;
+            
+            zones.forEach(z => {
+                if(!z.innerText) allFilled = false;
+                if(z.innerText === z.getAttribute('onclick').split("'")[3]) {
+                    correct++;
+                    z.classList.add('filled');
+                } else {
+                    z.classList.remove('filled');
+                    z.style.borderColor = 'red';
+                }
+            });
+
+            if(!allFilled) {
+                showModal("Perhatian", "Lengkapi seluruh paragraf!", "info");
+                return;
+            }
+            if(correct === 5) {
+                showModal("Hebat!", "Paragraf telah dilengkapi dengan benar!", "success");
+            } else {
+                showModal("Ops!", `Masih ada yang belum tepat (${correct}/5).`, "error");
+            }
+        }
+
+        // Game 3 Check (Fill in blanks text)
+        function checkGame3() {
+            const answers = ['lingkaran', 'persegi panjang', 'lingkaran', 'tinggi', 'permukaan'];
+            let correct = 0;
+            let allFilled = true;
+            for(let i=1; i<=5; i++) {
+                const input = document.getElementById(`g3-${i}`);
+                if(!input.value.trim()) allFilled = false;
+                
+                if(input.value.toLowerCase().trim() === answers[i-1]) {
+                    correct++;
+                    input.classList.remove('border-blue-400', 'border-red-500', 'text-blue-800', 'text-red-500');
+                    input.classList.add('border-green-500', 'text-green-600', 'bg-green-50');
+                } else {
+                    input.classList.remove('border-blue-400', 'border-green-500', 'text-blue-800', 'text-green-600', 'bg-green-50');
+                    input.classList.add('border-red-500', 'text-red-500');
+                }
+            }
+            
+            if(!allFilled) {
+                showModal("Perhatian", "Ketikkan semua jawaban terlebih dahulu!", "info");
+                return;
+            }
+            if(correct === 5) {
+                showModal("Sempurna!", "Kamu berhasil menjawab semua tebakan kata dengan benar!", "success");
+            } else {
+                showModal("Belum Tepat", `Jawaban benar: ${correct}/5. Silakan periksa kembali ketikanmu (gunakan huruf kecil).`, "error");
+            }
+        }
+
+        // Game 4 Logic (Tebak Gambar)
+        let g4Score = 0;
+        let g4Answered = 0;
+        function answerG4(btn, isCorrect) {
+            const parent = btn.parentElement;
+            // Prevent multiple clicks
+            if(parent.classList.contains('answered')) return;
+            
+            parent.classList.add('answered');
+            g4Answered++;
+            
+            if(isCorrect) {
+                g4Score++;
+                btn.classList.add('bg-green-500', 'text-white');
+                btn.innerHTML += ' <i class="fas fa-check"></i>';
+            } else {
+                btn.classList.add('bg-red-500', 'text-white');
+                btn.innerHTML += ' <i class="fas fa-times"></i>';
+                // Show correct one
+                const btns = parent.querySelectorAll('button');
+                btns.forEach(b => {
+                    if(b !== btn && b.getAttribute('onclick').includes('true')) {
+                        b.classList.add('bg-green-500');
+                    }
+                });
+            }
+            
+            if(g4Answered === 5) {
+                setTimeout(() => {
+                    if(g4Score === 5) showModal("Jenius!", "Kamu berhasil menebak semua benda bentuk tabung!", "success");
+                    else showModal("Selesai!", `Skor Tebak Gambar: ${g4Score}/5.`, "info");
+                }, 500);
+            }
+        }
+
+        // --- Quiz Logic ---
+        function submitQuiz() {
+            let score = 0;
+            let answered = 0;
+            const totalQ = 10;
+            
+            // Q1-Q7 (Radio)
+            for(let i=1; i<=7; i++) {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                if(selected) {
+                    answered++;
+                    // Find parent quiz-q
+                    const quizBox = document.querySelector(`input[name="q${i}"]`).closest('.quiz-q');
+                    const correctAns = quizBox.dataset.answer;
+                    if(selected.value === correctAns) score += 10;
+                }
+            }
+
+            // Q8-Q10 (Select)
+            for(let i=8; i<=10; i++) {
+                const select = document.getElementById(`q${i}`);
+                if(select.value !== "") {
+                    answered++;
+                    if(select.value === select.dataset.answer) score += 10;
+                }
+            }
+
+            if(answered < totalQ) {
+                showModal("Belum Selesai", `Kamu baru menjawab ${answered} dari ${totalQ} soal. Harap isi semuanya!`, "info");
+                return;
+            }
+
+            // Show Result
+            document.getElementById('quiz-container').classList.add('hidden');
+            const resultBox = document.getElementById('quiz-result');
+            resultBox.classList.remove('hidden');
+            
+            const scoreEl = document.getElementById('quiz-score');
+            const msgEl = document.getElementById('quiz-msg');
+            
+            // Animate score counter
+            let current = 0;
+            const timer = setInterval(() => {
+                scoreEl.innerText = current;
+                if(current >= score) {
+                    clearInterval(timer);
+                    if(score >= 80) msgEl.innerText = "Luar Biasa! Pemahamanmu tentang Tabung sangat mantap.";
+                    else if(score >= 50) msgEl.innerText = "Bagus! Tapi masih ada yang perlu dipelajari lagi ya.";
+                    else msgEl.innerText = "Jangan menyerah! Coba baca kembali materi dan tonton videonya.";
+                }
+                current += Math.max(1, Math.floor(score/20));
+            }, 30);
+        }
+
+        // Init
+        updateNav();
+
+    </script>
+</body>
+</html>
